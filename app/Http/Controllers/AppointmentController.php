@@ -4,87 +4,69 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    // Patient booking form
-    public function create()
-    {
-        return view('appointments.create');
-    }
-
-    // Patient stores appointment
+    // Store booking
     public function store(Request $request)
     {
         $request->validate([
-            'doctor_id' => 'required|exists:users,id',
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
+            'date' => 'required',
+            'time' => 'required',
+            'reason' => 'required',
         ]);
 
         Appointment::create([
-            'doctor_id' => $request->doctor_id,
-            'patient_id' => Auth::id(),
-            'appointment_date' => $request->appointment_date,
-            'appointment_time' => $request->appointment_time,
-            'status' => 'pending',
+            'patient_id' => auth()->id(), // assuming logged-in user
+            'date' => $request->date,
+            'time' => $request->time,
+            'reason' => $request->reason,
         ]);
 
-        return redirect()->route('appointments.create')->with('success', 'Appointment booked successfully!');
+        return redirect()->back()->with('success', 'Appointment booked successfully!');
     }
 
-    // Doctor views their appointments
-    public function doctorIndex()
-    {
-        $appointments = Appointment::where('doctor_id', Auth::id())->get();
-        return view('appointments.doctor_index', compact('appointments'));
-    }
-
-    // Doctor accepts appointment
-    public function accept(Appointment $appointment)
-    {
-        $appointment->update(['status' => 'accepted']);
-        return back()->with('success', 'Appointment accepted!');
-    }
-
-    // Doctor declines appointment
-    public function decline(Appointment $appointment)
-    {
-        $appointment->update(['status' => 'declined']);
-        return back()->with('error', 'Appointment declined!');
-    }
-
-    // Admin views all appointments
+    // Show appointments to doctor
     public function index()
     {
-        $appointments = Appointment::all();
-        return view('appointments.index', compact('appointments'));
+        $appointments = Appointment::with('patient')->orderBy('created_at', 'desc')->get();
+        return view('appointment', compact('appointments'));
     }
 
-    // Admin edits
-    public function edit(Appointment $appointment)
+    // Update status
+    public function updateStatus(Request $request, $id)
     {
-        return view('appointments.edit', compact('appointment'));
+        $appointment = Appointment::findOrFail($id);
+        $appointment->status = $request->status;
+        $appointment->save();
+
+        return redirect()->back()->with('success', 'Appointment ' . $request->status . ' successfully!');
     }
+    // Additional methods for admin management
+public function adminIndex()
+{
+    $appointments = Appointment::with('patient')->orderBy('created_at', 'desc')->get();
+    return view('admin', compact('appointments'));
+}
 
-    public function update(Request $request, Appointment $appointment)
-    {
-        $request->validate([
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
-            'status' => 'required',
-        ]);
+public function update(Request $request, $id)
+{
+    $appointment = Appointment::findOrFail($id);
+    $appointment->update([
+        'date' => $request->date,
+        'time' => $request->time,
+        'reason' => $request->reason,
+    ]);
 
-        $appointment->update($request->only('appointment_date', 'appointment_time', 'status', 'notes'));
+    return redirect()->back()->with('success', 'Appointment updated successfully!');
+}
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment updated!');
-    }
+public function destroy($id)
+{
+    $appointment = Appointment::findOrFail($id);
+    $appointment->delete();
 
-    // Admin deletes
-    public function destroy(Appointment $appointment)
-    {
-        $appointment->delete();
-        return redirect()->route('appointments.index')->with('success', 'Appointment deleted!');
-    }
+    return redirect()->back()->with('success', 'Appointment deleted successfully!');
+}
+
 }

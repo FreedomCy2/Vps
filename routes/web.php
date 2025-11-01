@@ -5,6 +5,7 @@ use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\AppointmentController;
 
+
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -13,33 +14,26 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// PATIENT ROUTES
-Route::middleware(['auth'])->group(function () {
-    Route::get('/patient/book', [AppointmentController::class, 'create'])->name('appointments.create');
-    Route::post('/patient/book', [AppointmentController::class, 'store'])->name('appointments.store');
-});
+Route::get('/booking', function () {
+    return view('booking');
+})->name('booking');
 
-// DOCTOR ROUTES
-Route::middleware(['auth'])->group(function () {
-    Route::get('/doctor/appointments', [AppointmentController::class, 'doctorIndex'])->name('appointments.doctor.index');
-    Route::post('/doctor/appointments/{appointment}/accept', [AppointmentController::class, 'accept'])->name('appointments.accept');
-    Route::post('/doctor/appointments/{appointment}/decline', [AppointmentController::class, 'decline'])->name('appointments.decline');
-});
+Route::get('/appointments', function () {
+    return view('appointments');
+})->name('appointments');
 
-// ADMIN ROUTES
-Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('/admin/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
-    Route::put('/admin/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
-    Route::delete('/admin/appointments/{appointment}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
+//admin
+Route::get('/admin', [AppointmentController::class, 'adminIndex'])->name('admin.index');
+Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name('appointments.update');
+Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
-/*
-|--------------------------------------------------------------------------
-| USER SETTINGS (Volt) — these still need auth
-|--------------------------------------------------------------------------
-*/
+Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+Route::patch('/appointments/{id}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');    
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
+
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('user-password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');

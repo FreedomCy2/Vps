@@ -5,28 +5,23 @@
 
         <div class="flex gap-4">
             <!-- Button 1 -->
-            <a href="/patients/book"
+            <a href="/booking"
                class="px-6 py-3 bg-blue-600 text-black font-bold rounded-lg hover:bg-blue-700 transition">
                 Appointments
             </a>
 
             <!-- Button 2 -->
-            <a href="/doctors/manage"
+            <a href="/appointment"
                class="px-6 py-3 bg-green-600 text-black font-bold rounded-lg hover:bg-green-700 transition">
-                Doc manage
+                Appointment
             </a>
 
             <!-- Button 3 -->
-            <a href="/admin/appointments"
+            <a href="/admin"
                class="px-6 py-3 bg-purple-600 text-black font-bold rounded-lg hover:bg-purple-700 transition">
                 Admin appointments
             </a>
 
-            <!-- Button 4 -->
-            <a href="/admin/edit"
-               class="px-6 py-3 bg-purple-600 text-black font-bold rounded-lg hover:bg-purple-700 transition">
-                Admin edit
-            </a>
         </div>
     </div>
 </x-layouts.app>

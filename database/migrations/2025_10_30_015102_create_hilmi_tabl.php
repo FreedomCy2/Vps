@@ -11,20 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('appointments', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('doctor_id');
-            $table->unsignedBigInteger('patient_id');
-            $table->date('appointment_date');
-            $table->time('appointment_time');
-            $table->string('status')->default('pending'); // pending | accepted | declined
-            $table->text('notes')->nullable();
-            $table->timestamps();
+Schema::create('appointments', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('patient_id');
+    $table->unsignedBigInteger('doctor_id')->nullable();
+    $table->string('date');
+    $table->string('time');
+    $table->text('reason');
+    $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+    $table->timestamps();
+});
 
-            // Foreign keys
-            $table->foreign('doctor_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('patient_id')->references('id')->on('users')->onDelete('cascade');
-        });
     }
 
     /**
