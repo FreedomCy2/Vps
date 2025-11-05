@@ -354,8 +354,4 @@ Route::middleware(['auth'])->group(function () {
 // ------------------
 // Auth Scaffolding
 // ------------------
-<<<<<<< HEAD
 require __DIR__ . '/auth.php';
-=======
-require __DIR__ . '/auth.php';
->>>>>>> 7549f97 (please work)
