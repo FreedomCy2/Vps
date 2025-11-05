@@ -65,10 +65,11 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+    // Add this new provider for doctors
+    'doctors' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Doctor::class, // Make sure you have a Doctor model
+    ],
     ],
 
     /*
@@ -97,14 +98,23 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+
+    // Add this new broker for doctors
+    'doctors' => [
+        'provider' => 'doctors',
+        'table' => 'doctor_password_reset_tokens',
+        'expire' => 60,
+        'throttle' => 60,
     ],
+],
 
     /*
     |--------------------------------------------------------------------------
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |
-    | Here you may define the number of seconds before a password confirmation
+    | Here you may define the amount of seconds before a password confirmation
     | window expires and users are asked to re-enter their password via the
     | confirmation screen. By default, the timeout lasts for three hours.
     |
