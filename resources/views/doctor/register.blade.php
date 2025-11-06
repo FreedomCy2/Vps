@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Green Pulse Clinic - Doctor Registration</title>
+    <title>Clinic Flow - Doctor Registration</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -44,7 +44,7 @@
             <div class="bg-clinic-500 py-6 px-8 text-center">
                 <div class="flex items-center justify-center space-x-2">
                     <i data-feather="heart" class="text-white w-6 h-6"></i>
-                    <h1 class="text-2xl font-bold text-white">Green Pulse Clinic</h1>
+                    <h1 class="text-2xl font-bold text-white">Clinic Flow</h1>
                 </div>
                 <p class="mt-2 text-clinic-100">Doctor Registration Portal</p>
             </div>
