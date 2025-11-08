@@ -103,7 +103,7 @@
             </div>
             <h3 class="text-xl font-bold mb-3">Manage Bookings</h3>
             <p class="text-gray-600 mb-4">View, edit, or cancel your existing appointments.</p>
-            <a href="{{ route('user.history') }}" class="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#3b82f6]/90 transition">
+            <a href="{{ route('user.appointments') }}" class="px-4 py-2 bg-[#3b82f6] text-white rounded-lg hover:bg-[#3b82f6]/90 transition">
                 Manage Now
             </a>
         </div>

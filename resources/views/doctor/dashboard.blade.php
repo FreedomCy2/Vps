@@ -6,7 +6,7 @@
     @php
         $doctor = \App\Models\Doctor::find(session('doctor_id'));
     @endphp
-    Welcome back, Dr. {{ $doctor->name ?? 'Doctor' }}
+    Welcome back, Doctor {{ $doctor->name ?? 'Doctor' }}
 @endsection
 
 @section('content')

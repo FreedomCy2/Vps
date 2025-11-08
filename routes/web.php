@@ -19,7 +19,10 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\UserBookingController;
 use App\Http\Controllers\Admin\UserCrudController;
-use App\Http\Controllers\UserBookingHistory2;
+use App\Http\Controllers\User\UserBookingController3;
+use App\Http\Controllers\UserForgotPasswordController;
+use App\Http\Controllers\UserResetPasswordController;
+use App\Http\Controllers\Doctor\DoctorProfileController;
 
 // ------------------
 // Home Route
@@ -171,6 +174,16 @@ Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.l
 Route::post('/register', [UserRegisterController::class, 'register'])->name('register');
 
 // ------------------
+// User Forgot Password Routes
+// ------------------
+Route::prefix('user')->name('user.')->group(function () {
+    Route::get('forgot-password', [UserForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('forgot-password', [UserForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('reset-password/{token}', [UserResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [UserResetPasswordController::class, 'reset'])->name('password.update');
+});
+
+// ------------------
 // User Routes - Protected by Session Check
 // ------------------
 Route::prefix('user')->name('user.')->group(function () {
@@ -188,8 +201,9 @@ Route::prefix('user')->name('user.')->group(function () {
         return view('user.profile');
     })->name('profile');
 
-    // NEW: Updated history route to use UserBookingHistory2 controller
-    Route::get('/history', [UserBookingHistory2::class, 'index'])->name('history');
+    // NEW: Appointments and History routes using UserBookingController3
+    Route::get('/appointments', [UserBookingController3::class, 'index'])->name('appointments');
+    Route::get('/history', [UserBookingController3::class, 'history'])->name('history');
 
     Route::get('/edit', function (Request $request) {
         if (!$request->session()->has('user_id')) {
@@ -218,43 +232,24 @@ Route::get('/user/information2', function () {
 })->name('user.information2');
 
 // ------------------
-// NEW: User Booking History Routes (UserBookingHistory2 Controller)
+// UPDATED: User Booking Management Routes (UserBookingController3)
+// These routes now use the soft delete functionality (is_hidden flag)
 // ------------------
-Route::prefix('user')->name('user.')->group(function () {
-    Route::get('/booking/{id}', function (Request $request, $id) {
-        if (!$request->session()->has('user_id')) {
-            return redirect()->route('user.login');
-        }
-        return app(UserBookingHistory2::class)->show($request, $id);
-    })->name('booking.show');
+Route::prefix('user')->name('user.')->middleware('web')->group(function () { 
+    // Show booking details
+    Route::get('/booking/{id}', [UserBookingController3::class, 'show'])->name('booking.show');
     
-    Route::get('/booking/{id}/edit', function (Request $request, $id) {
-        if (!$request->session()->has('user_id')) {
-            return redirect()->route('user.login');
-        }
-        return app(UserBookingHistory2::class)->edit($request, $id);
-    })->name('booking.edit');
+    // Edit booking form
+    Route::get('/booking/{id}/edit', [UserBookingController3::class, 'edit'])->name('booking.edit');
     
-    Route::put('/booking/{id}', function (Request $request, $id) {
-        if (!$request->session()->has('user_id')) {
-            return redirect()->route('user.login');
-        }
-        return app(UserBookingHistory2::class)->update($request, $id);
-    })->name('booking.update');
+    // Update booking
+    Route::put('/booking/{id}', [UserBookingController3::class, 'update'])->name('booking.update');
     
-    Route::patch('/booking/{id}/cancel', function (Request $request, $id) {
-        if (!$request->session()->has('user_id')) {
-            return redirect()->route('user.login');
-        }
-        return app(UserBookingHistory2::class)->cancel($request, $id);
-    })->name('booking.cancel');
+    // Cancel booking (changes status to 'Cancelled')
+    Route::patch('/booking/{id}/cancel', [UserBookingController3::class, 'cancel'])->name('booking.cancel');
     
-    Route::delete('/booking/{id}', function (Request $request, $id) {
-        if (!$request->session()->has('user_id')) {
-            return redirect()->route('user.login');
-        }
-        return app(UserBookingHistory2::class)->destroy($request, $id);
-    })->name('booking.destroy');
+    // SOFT DELETE: Hide booking from view (sets is_hidden = true, does NOT delete from database)
+    Route::delete('/booking/{id}', [UserBookingController3::class, 'destroy'])->name('booking.destroy');
 });
 
 // ------------------
@@ -267,6 +262,10 @@ Route::get('/doctor/login', function () {
 Route::get('/doctor/register', function () {
     return view('doctor.register');
 })->name('doctor.register');
+
+// Profile routes
+Route::get('/doctor/profile', [DoctorProfileController::class, 'edit'])->name('doctor.profile.edit');
+Route::put('/doctor/profile', [DoctorProfileController::class, 'update'])->name('doctor.profile.update');
 
 // Doctor authentication (POST login and logout)
 Route::post('/doctor/login', [DoctorAuthController::class, 'login'])->name('doctor.login.submit');

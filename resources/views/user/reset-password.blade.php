@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password | Clinic Flow</title>
+    <title>Reset Password | Clinic Flow</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -47,18 +47,11 @@
     </div>
 </nav>
 
-<!-- Forgot Password Section -->
+<!-- Reset Password Section -->
 <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
     <div class="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-10">
-        <h1 class="text-3xl font-extrabold text-primary mb-6 text-center">Forgot Your Password?</h1>
-        <p class="text-gray-600 text-center mb-8">Enter your email address below and we'll send you instructions to reset your password.</p>
-
-        <!-- Success Message -->
-        @if (session('status'))
-            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                {{ session('status') }}
-            </div>
-        @endif
+        <h1 class="text-3xl font-extrabold text-primary mb-6 text-center">Reset Your Password</h1>
+        <p class="text-gray-600 text-center mb-8">Enter your new password below.</p>
 
         <!-- Error Messages -->
         @if ($errors->any())
@@ -72,15 +65,28 @@
         @endif
 
         <!-- Form -->
-        <form method="POST" action="{{ route('user.password.email') }}" class="space-y-6">
+        <form method="POST" action="{{ route('user.password.update') }}" class="space-y-6">
             @csrf
+            <input type="hidden" name="token" value="{{ $token }}">
+            
             <div>
                 <label for="email" class="block text-gray-700 mb-1">Email Address</label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}" class="w-full border-gray-300 rounded-lg p-4 focus:ring-primary focus:border-primary" required autofocus>
+                <input type="email" name="email" id="email" value="{{ $email ?? old('email') }}" class="w-full border-gray-300 rounded-lg p-4 focus:ring-primary focus:border-primary" required autofocus>
+            </div>
+
+            <div>
+                <label for="password" class="block text-gray-700 mb-1">New Password</label>
+                <input type="password" name="password" id="password" class="w-full border-gray-300 rounded-lg p-4 focus:ring-primary focus:border-primary" required>
+                <p class="text-sm text-gray-500 mt-1">Minimum 8 characters</p>
+            </div>
+
+            <div>
+                <label for="password_confirmation" class="block text-gray-700 mb-1">Confirm Password</label>
+                <input type="password" name="password_confirmation" id="password_confirmation" class="w-full border-gray-300 rounded-lg p-4 focus:ring-primary focus:border-primary" required>
             </div>
 
             <button type="submit" class="w-full btn-primary text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition">
-                Send Password Reset Link
+                Reset Password
             </button>
         </form>
 

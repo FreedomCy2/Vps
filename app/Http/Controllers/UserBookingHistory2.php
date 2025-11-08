@@ -13,19 +13,21 @@ class UserBookingHistory2 extends Controller
      */
     public function index(Request $request)
     {
-        // Get user_id from session
+        // Use Laravel auth or session-based login
         $userId = $request->session()->get('user_id');
-        
+
         if (!$userId) {
-            return redirect()->route('user.login')->with('error', 'Please login to view your booking history.');
+            return redirect()->route('user.login')
+                ->with('error', 'Please login to view your booking history.');
         }
 
-        // Get status filter from query string
+        // Optional status filter from ?status=Pending
         $status = $request->query('status');
 
         // Fetch bookings with optional status filter
-        $bookings = UserBooking2::byUser($userId)
-            ->byStatus($status)
+        $bookings = UserBooking2::query()
+            ->when($userId, fn($q) => $q->where('user_id', $userId))
+            ->when($status, fn($q) => $q->where('status', $status))
             ->orderBy('date', 'desc')
             ->orderBy('time', 'desc')
             ->get();
@@ -34,25 +36,15 @@ class UserBookingHistory2 extends Controller
     }
 
     /**
-     * Show the form for creating a new booking
-     */
-    public function create(Request $request)
-    {
-        $userId = $request->session()->get('user_id');
-        
-        if (!$userId) {
-            return redirect()->route('user.login');
-        }
-
-        return view('user.information');
-    }
-
-    /**
      * Store a newly created booking
      */
     public function store(Request $request)
     {
         $userId = $request->session()->get('user_id');
+
+        if (!$userId) {
+            return redirect()->route('user.login');
+        }
 
         $validator = Validator::make($request->all(), [
             'service' => 'required|string|max:255',
@@ -67,9 +59,7 @@ class UserBookingHistory2 extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         UserBooking2::create([
@@ -86,16 +76,17 @@ class UserBookingHistory2 extends Controller
             'status' => 'Pending',
         ]);
 
-        return redirect()->route('user.history')->with('success', 'Appointment booked successfully!');
+        return redirect()->route('user.history')
+            ->with('success', 'Appointment booked successfully!');
     }
 
     /**
-     * Display the specified booking
+     * Display a single booking
      */
     public function show(Request $request, $id)
     {
         $userId = $request->session()->get('user_id');
-        
+
         if (!$userId) {
             return redirect()->route('user.login');
         }
@@ -108,89 +99,12 @@ class UserBookingHistory2 extends Controller
     }
 
     /**
-     * Show the form for editing the specified booking
-     */
-    public function edit(Request $request, $id)
-    {
-        $userId = $request->session()->get('user_id');
-        
-        if (!$userId) {
-            return redirect()->route('user.login');
-        }
-
-        $booking = UserBooking2::where('id', $id)
-            ->where('user_id', $userId)
-            ->firstOrFail();
-
-        if (!$booking->canBeEdited()) {
-            return redirect()->route('user.history')
-                ->with('error', 'This booking cannot be edited.');
-        }
-
-        return view('user.booking-edit', compact('booking'));
-    }
-
-    /**
-     * Update the specified booking
-     */
-    public function update(Request $request, $id)
-    {
-        $userId = $request->session()->get('user_id');
-        
-        if (!$userId) {
-            return redirect()->route('user.login');
-        }
-
-        $booking = UserBooking2::where('id', $id)
-            ->where('user_id', $userId)
-            ->firstOrFail();
-
-        if (!$booking->canBeEdited()) {
-            return redirect()->route('user.history')
-                ->with('error', 'This booking cannot be edited.');
-        }
-
-        $validator = Validator::make($request->all(), [
-            'service' => 'required|string|max:255',
-            'date' => 'required|date|after_or_equal:today',
-            'time' => 'required',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
-            'age' => 'required|integer|min:1|max:150',
-            'gender' => 'required|string|in:Male,Female,Other',
-            'symptom' => 'nullable|string|max:1000',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $booking->update([
-            'service' => $request->service,
-            'date' => $request->date,
-            'time' => $request->time,
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'age' => $request->age,
-            'gender' => $request->gender,
-            'symptom' => $request->symptom,
-        ]);
-
-        return redirect()->route('user.history')
-            ->with('success', 'Appointment updated successfully!');
-    }
-
-    /**
      * Cancel the specified booking
      */
     public function cancel(Request $request, $id)
     {
         $userId = $request->session()->get('user_id');
-        
+
         if (!$userId) {
             return redirect()->route('user.login');
         }
@@ -199,7 +113,8 @@ class UserBookingHistory2 extends Controller
             ->where('user_id', $userId)
             ->firstOrFail();
 
-        if (!$booking->canBeCancelled()) {
+        // Only allow cancelling Pending/Confirmed bookings
+        if (!in_array($booking->status, ['Pending', 'Confirmed'])) {
             return redirect()->route('user.history')
                 ->with('error', 'This booking cannot be cancelled.');
         }
@@ -211,12 +126,12 @@ class UserBookingHistory2 extends Controller
     }
 
     /**
-     * Remove the specified booking from storage (soft delete by status)
+     * Delete booking
      */
     public function destroy(Request $request, $id)
     {
         $userId = $request->session()->get('user_id');
-        
+
         if (!$userId) {
             return redirect()->route('user.login');
         }

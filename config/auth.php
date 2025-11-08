@@ -70,6 +70,14 @@ return [
         'driver' => 'eloquent',
         'model' => App\Models\Doctor::class, // Make sure you have a Doctor model
     ],
+
+    // Provider for user_login table
+    'user_logins' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\UserLogin2::class,
+    ],
+
+
     ],
 
     /*
@@ -107,6 +115,14 @@ return [
         'expire' => 60,
         'throttle' => 60,
     ],
+
+    // Broker for user_login table
+    'user_logins' => [
+        'provider' => 'user_logins',
+        'table' => 'user_password_reset_tokens',
+        'expire' => 60,
+        'throttle' => 60,
+    ],    
 ],
 
     /*

@@ -12,9 +12,4 @@ class UserBooking extends Model
     protected $fillable = [
         'service', 'date', 'time', 'name', 'email', 'phone', 'age', 'gender', 'symptom'
     ];
-
-    protected $casts = [
-        'date' => 'date',
-        'time' => 'string',
-    ];
 }

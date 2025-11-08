@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment History | Clinic Flow</title>
+    <title>My Appointments | Clinic Flow</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -49,8 +49,8 @@
             </div>
             <div class="flex items-center space-x-6">
                 <a href="{{ route('user.dashboard') }}" class="text-gray-600 font-medium hover:text-gray-900">Home</a>
-                <a href="{{ route('user.appointments') }}" class="text-gray-600 font-medium hover:text-gray-900">Appointments</a>
-                <a href="{{ route('user.history') }}" class="text-primary font-medium">History</a>
+                <a href="{{ route('user.appointments') }}" class="text-primary font-medium">Appointments</a>
+                <a href="{{ route('user.history') }}" class="text-gray-600 font-medium hover:text-gray-900">History</a>
                 <a href="{{ route('user.profile') }}" class="text-gray-600 font-medium hover:text-gray-900">Profile</a>
                 <form method="POST" action="{{ route('logout') }}" class="inline"> 
                     @csrf
@@ -64,7 +64,7 @@
 <main class="container mx-auto px-6 py-16">
     <div class="max-w-5xl mx-auto">
         
-        <h1 class="text-4xl font-extrabold text-center text-primary mb-10">Appointment History</h1>
+        <h1 class="text-4xl font-extrabold text-center text-primary mb-10">My Active Appointments</h1>
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
@@ -77,9 +77,7 @@
 @if(isset($bookings) && $bookings->isNotEmpty())
     <div class="space-y-4">
         @foreach($bookings as $booking)
-            <div class="p-5 border border-gray-200 rounded-lg card 
-                @if($booking->status === 'Cancelled') bg-red-50 @else bg-green-50 @endif 
-                hover:bg-white transition duration-300">
+            <div class="p-5 border border-gray-200 rounded-lg card bg-gray-50 hover:bg-white transition duration-300">
                 <div class="flex flex-wrap justify-between items-start gap-4">
                     <div class="flex-1">
                         <p class="text-sm text-gray-500 font-medium">Service</p>
@@ -111,8 +109,8 @@
                         <div class="text-right">
                             <p class="text-sm text-gray-500 font-medium">Status</p>
                             <span class="px-3 py-1 text-xs font-semibold rounded-full 
-                                @if($booking->status === 'Done') bg-green-100 text-green-800
-                                @elseif($booking->status === 'Cancelled') bg-red-100 text-red-800
+                                @if($booking->status === 'Pending') bg-yellow-100 text-yellow-800
+                                @elseif($booking->status === 'Confirmed') bg-blue-100 text-blue-800
                                 @endif
                             ">
                                 {{ strtoupper($booking->status) }}
@@ -129,32 +127,37 @@
                 </div>
 
                 <div class="mt-4 flex flex-wrap gap-3">
+                    <a href="{{ route('user.booking.edit', $booking->id) }}"
+                       class="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-blue-600 transition font-medium shadow-md">
+                        <i data-feather="edit-2" class="inline h-4 w-4"></i> Edit
+                    </a>
+                    
+                    <form method="POST" action="{{ route('user.booking.cancel', $booking->id) }}" class="inline">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" 
+                                onclick="return confirm('Are you sure you want to cancel this appointment?')"
+                                class="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium shadow-md">
+                            <i data-feather="x-circle" class="inline h-4 w-4"></i> Cancel
+                        </button>
+                    </form>
+                    
                     <a href="{{ route('user.booking.show', $booking->id) }}"
                        class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-medium shadow-md">
                         <i data-feather="eye" class="inline h-4 w-4"></i> View Details
                     </a>
-                    
-                    <form method="POST" action="{{ route('user.booking.destroy', $booking->id) }}" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" 
-                                onclick="return confirm('Remove this record from your view? (The data will remain in the database)')"
-                                class="px-4 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium shadow-md">
-                            <i data-feather="eye-off" class="inline h-4 w-4"></i> Hide from View
-                        </button>
-                    </form>
                 </div>
             </div>
         @endforeach
     </div>
 @else
     <div class="py-20 text-center">
-        <i data-feather="archive" class="h-16 w-16 text-gray-400 mx-auto mb-4"></i>
-        <p class="text-xl font-semibold text-gray-700 mb-2">No History Found</p>
-        <p class="text-gray-500">You don't have any cancelled or completed appointments.</p>
-        <a href="{{ route('user.appointments') }}" 
+        <i data-feather="calendar" class="h-16 w-16 text-gray-400 mx-auto mb-4"></i>
+        <p class="text-xl font-semibold text-gray-700 mb-2">No Active Appointments</p>
+        <p class="text-gray-500">You don't have any active appointments at the moment.</p>
+        <a href="{{ route('user.information.form') }}" 
            class="mt-6 inline-block px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition font-medium shadow-md">
-            View Active Appointments
+            Book New Appointment
         </a>
     </div>
 @endif
